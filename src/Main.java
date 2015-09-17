@@ -11,7 +11,7 @@ public class Main {
             do {
                 token = scanner.getNextToken();
             } while (token.getClassfication() != TokenClassification.EOF);
-            System.out.println("compilação completa");
+            System.out.println("scan completed");
         }catch (InvalidTokenException ex){
             System.out.println(ex.getMessage());
         }catch (IOException ex){
