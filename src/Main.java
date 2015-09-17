@@ -4,10 +4,10 @@ public class Main {
 
     public static void main(String[] args) throws IOException, InvalidTokenException {
         FileReader fileReader = new FileReader();
-        Token token = null;
-        fileReader.open(args[0]);
-        Scanner scanner = new Scanner(fileReader);
         try {
+            fileReader.open(args[0]);
+            Token token;
+            Scanner scanner = new Scanner(fileReader);
             do {
                 token = scanner.getNextToken();
                 if (token != null)
