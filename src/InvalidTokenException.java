@@ -1,5 +1,3 @@
-package com.compiler.scanner;
-
 /**
  * Created by guilherme on 07/09/15.
  */
