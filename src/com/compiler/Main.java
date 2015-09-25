@@ -1,3 +1,4 @@
+/*created by guilherme lucena*/
 package com.compiler;
 import com.compiler.scanner.InvalidTokenException;
 import com.compiler.scanner.Scanner;
