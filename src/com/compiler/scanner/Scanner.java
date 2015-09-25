@@ -27,7 +27,16 @@ public class Scanner {
     }
 
 
+    public int getLastLine() {
+        return lastLine;
+    }
+
+    public int getLastColumn() {
+        return lastColumn;
+    }
+
     private void lookAhead() throws  IOException{
+
         this.lastLine = file.getActualLine();
         this.lastColumn = file.getActualColumn();
         this.actualCharacter = file.getNextChar();

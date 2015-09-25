@@ -1,4 +1,6 @@
 package com.compiler;
+import com.compiler.parser.InvalidExpressionException;
+import com.compiler.parser.Parser;
 import com.compiler.scanner.InvalidTokenException;
 import com.compiler.scanner.Scanner;
 import com.compiler.scanner.Token;
@@ -16,15 +18,10 @@ public class Main {
             fileReader.open(args[0]);
             Token token;
             Scanner scanner = new Scanner(fileReader);
-            do {
-                token = scanner.getNextToken();
-            } while (token.getClassfication() != TokenClassification.EOF);
-            System.out.println("scan completed");
-        }catch (InvalidTokenException ex){
-            System.out.println(ex.getMessage());
-        }catch (IOException ex){
-            System.out.println(ex.getMessage());
-        }catch (Exception ex){
+            Parser parser = new Parser(scanner);
+            parser.parse();
+            System.out.println("IT WORKS MA NIGGA!!!! LET'S TAKE SOME HOES!");
+        }catch (InvalidExpressionException |InvalidTokenException | IOException ex){
             System.out.println(ex.getMessage());
         }
         finally {
