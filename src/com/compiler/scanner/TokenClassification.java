@@ -100,6 +100,7 @@ public enum TokenClassification {
         return false;
     }
 
+    public static boolean isTerm(TokenClassification classification) {return isFactor(classification);}
 
     public static boolean isRelationalExpression(TokenClassification classfication) {
         return isFactor(classfication);

@@ -61,11 +61,12 @@ public class Parser {
         if (token.getClassfication() != TokenClassification.BRACKETS_CLOSE){
             throw  builException(TokenClassification.BRACKETS_CLOSE.toString());
         }
+        lookAhead();
     }
 
     private void typeEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException {
         if (!TokenClassification.isType(token.getClassfication())){
-            throw new IllegalStateException("function should be called when the token is a type");
+            throw builException("TYPE");
         }
         lookAhead();
         if (token.getClassfication() != TokenClassification.ID){
@@ -109,12 +110,10 @@ public class Parser {
             throw  builException(TokenClassification.PARENTESIS_OPEN.toString());
         }
         lookAhead();
-        if (TokenClassification.isRelationalExpression(token.getClassfication())){
-            relationalExpressionEvaluation();
-        }
-        else{
+        if (!TokenClassification.isRelationalExpression(token.getClassfication())){
             throw builException("RELATIONAL_EXPRESSION");
         }
+        relationalExpressionEvaluation();
         if (token.getClassfication() != TokenClassification.PARENTESIS_CLOSE){
             throw builException(TokenClassification.PARENTESIS_CLOSE.toString());
         }
@@ -123,38 +122,157 @@ public class Parser {
             throw builException("COMMAND");
         }
         commandEvaluation();
+        if (token.getClassfication() == TokenClassification.ELSE){
+            lookAhead();
+            commandEvaluation();
+        }
+
     }
 
     private void relationalExpressionEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
-        if(TokenClassification.isArithimeticExpression(token.getClassfication())){
-            arithimeticExpressionEvaluation();
-        }
-        else {
+        if(!TokenClassification.isArithimeticExpression(token.getClassfication())){
             throw builException("ARITHIMETIC_EXPRESSION");
         }
+        arithmeticExpressionEvaluation();
         if (!TokenClassification.isRelationalOperator(token.getClassfication())){
             throw builException("RELATIONAL_OPERATOR");
         }
         lookAhead();
-        if(TokenClassification.isArithimeticExpression(token.getClassfication())){
-            arithimeticExpressionEvaluation();
-        }
-        else {
+        if(!TokenClassification.isArithimeticExpression(token.getClassfication())){
             throw builException("ARITHIMETIC_EXPRESSION");
         }
+        arithmeticExpressionEvaluation();
     }
 
-    private void arithimeticExpressionEvaluation() {
-        //TODO: FAZER ESSA PORRA QUANDO ABRIR DINOVO CARALHO
-        .AJDSLKJLSÇAJFLÇSA
+    private void arithmeticExpressionEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+        if(!TokenClassification.isTerm(token.getClassfication())){
+            throw builException("TERM");
+        }
+        termEvaluation();
+        arithmeticContinuation();
     }
 
-    private void iterationEvaluation() {
-
+    private void arithmeticContinuation() throws IOException, InvalidTokenException, InvalidExpressionException {
+        if(token.getClassfication() == TokenClassification.PLUS || token.getClassfication() == TokenClassification.SUB){
+            lookAhead();
+            termEvaluation();
+            arithmeticContinuation();
+        }
     }
 
-    private void basicCommandEvaluation() {
+    private void termEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+        if(!TokenClassification.isFactor(token.getClassfication())){
+            throw  builException("FACTOR");
+        }
+        factorEvaluation();
+        termContinuation();
+    }
 
+    private void termContinuation() throws IOException, InvalidTokenException, InvalidExpressionException {
+        if(token.getClassfication() == TokenClassification.DIV || token.getClassfication() == TokenClassification.MULT){
+            lookAhead();
+            factorEvaluation();
+            termContinuation();
+        }
+    }
+
+    private void factorEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException {
+        if(!TokenClassification.isFactor(token.getClassfication())){
+            throw  builException("FACTOR");
+        }
+        if(token.getClassfication() == TokenClassification.PARENTESIS_OPEN){
+            lookAhead();
+            arithmeticExpressionEvaluation();
+            if(token.getClassfication() != TokenClassification.PARENTESIS_CLOSE){
+                throw builException(TokenClassification.PARENTESIS_CLOSE.toString());
+            }
+            lookAhead();
+        }
+        else {
+            lookAhead();
+        }
+    }
+
+    private void iterationEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+        if(!TokenClassification.isIteration(token.getClassfication())){
+            throw builException("ITERATION");
+        }
+        if(token.getClassfication() == TokenClassification.WHILE){
+           whileEValuation();
+        }
+        else {
+            doWhileEvaluation();
+        }
+    }
+
+    private void doWhileEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+        if(token.getClassfication() != TokenClassification.DO){
+            throw builException(TokenClassification.DO.toString());
+        }
+        lookAhead();
+        commandEvaluation();
+        if(token.getClassfication() != TokenClassification.WHILE){
+            throw builException(TokenClassification.WHILE.toString());
+        }
+        lookAhead();
+        if(token.getClassfication() != TokenClassification.PARENTESIS_OPEN){
+            throw builException(TokenClassification.PARENTESIS_OPEN.toString());
+        }
+        lookAhead();
+        relationalExpressionEvaluation();
+        if(token.getClassfication() != TokenClassification.PARENTESIS_CLOSE){
+            throw builException(TokenClassification.PARENTESIS_CLOSE.toString());
+        }
+        lookAhead();
+        if(token.getClassfication() != TokenClassification.SEMICOLON){
+            throw builException(TokenClassification.SEMICOLON.toString());
+        }
+        lookAhead();
+    }
+
+    private void whileEValuation() throws InvalidExpressionException, IOException, InvalidTokenException {
+        if(token.getClassfication() != TokenClassification.WHILE){
+            throw builException(TokenClassification.WHILE.toString());
+        }
+        lookAhead();
+        if(token.getClassfication() != TokenClassification.PARENTESIS_OPEN){
+            throw builException(TokenClassification.PARENTESIS_OPEN.toString());
+        }
+        lookAhead();
+        relationalExpressionEvaluation();
+        if(token.getClassfication() != TokenClassification.PARENTESIS_CLOSE){
+            throw builException(TokenClassification.PARENTESIS_CLOSE.toString());
+        }
+        lookAhead();
+        commandEvaluation();
+    }
+
+    private void basicCommandEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+        if(!TokenClassification.isBasicCommand(token.getClassfication())){
+            throw builException("BASIC_COMMAND");
+        }
+        if(token.getClassfication() == TokenClassification.ID){
+            assignmentEvaluation();
+        }
+        else {
+            blockEvaluation();
+        }
+    }
+
+    private void assignmentEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+        if(token.getClassfication() != TokenClassification.ID){
+            throw builException(TokenClassification.ID.toString());
+        }
+        lookAhead();
+        if(token.getClassfication() != TokenClassification.ASSIGNING){
+            throw builException(TokenClassification.ASSIGNING.toString());
+        }
+        lookAhead();
+        arithmeticExpressionEvaluation();
+        if(token.getClassfication() != TokenClassification.SEMICOLON){
+           throw  builException("SEMICOLON");
+        }
+        lookAhead();
     }
 
     private void lookAhead() throws IOException, InvalidTokenException {
