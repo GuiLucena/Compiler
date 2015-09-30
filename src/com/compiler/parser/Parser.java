@@ -22,6 +22,9 @@ public class Parser {
     public void parse() throws IOException, InvalidTokenException, InvalidExpressionException {
         lookAhead();
         programEvaluation();
+        if(token.getClassfication() != TokenClassification.EOF){
+            throw builException("END OF FILE");
+        }
     }
 
     private void programEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException {
