@@ -1,5 +1,3 @@
-package com.compiler.util;
-
 /**
  * Created by guilherme on 04/09/15.
  */

@@ -1,10 +1,3 @@
-package com.compiler.parser;
-
-import com.compiler.scanner.InvalidTokenException;
-import com.compiler.scanner.Scanner;
-import com.compiler.scanner.Token;
-import com.compiler.scanner.TokenClassification;
-
 import java.io.IOException;
 
 /**

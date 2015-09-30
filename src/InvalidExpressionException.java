@@ -1,8 +1,3 @@
-package com.compiler.parser;
-
-import com.compiler.scanner.Token;
-import com.compiler.scanner.TokenClassification;
-
 /**
  * Created by guilherme on 23/09/15.
  */

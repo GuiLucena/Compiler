@@ -1,12 +1,3 @@
-package com.compiler;
-import com.compiler.parser.InvalidExpressionException;
-import com.compiler.parser.Parser;
-import com.compiler.scanner.InvalidTokenException;
-import com.compiler.scanner.Scanner;
-import com.compiler.scanner.Token;
-import com.compiler.scanner.TokenClassification;
-import com.compiler.util.FileReader;
-
 import java.io.IOException;
 
 

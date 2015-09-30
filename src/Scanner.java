@@ -1,8 +1,3 @@
-package com.compiler.scanner;
-
-import com.compiler.util.CharacterValidations;
-import com.compiler.util.FileReader;
-
 import java.io.IOException;
 
 /**

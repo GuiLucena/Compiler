@@ -1,7 +1,3 @@
-package com.compiler.scanner;
-
-import java.lang.reflect.Type;
-
 /**
  * Created by guilherme on 01/09/15.
  */
