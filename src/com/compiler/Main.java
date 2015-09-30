@@ -16,11 +16,10 @@ public class Main {
         FileReader fileReader = new FileReader();
         try {
             fileReader.open(args[0]);
-            Token token;
             Scanner scanner = new Scanner(fileReader);
             Parser parser = new Parser(scanner);
             parser.parse();
-            System.out.println("IT WORKS MA NIGGA!!!! LET'S TAKE SOME HOES!");
+            System.out.println("PARSE COMCLUIDO COM SUCESSO");
         }catch (InvalidExpressionException |InvalidTokenException | IOException ex){
             System.out.println(ex.getMessage());
         }
