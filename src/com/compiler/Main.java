@@ -19,7 +19,7 @@ public class Main {
             Scanner scanner = new Scanner(fileReader);
             Parser parser = new Parser(scanner);
             parser.parse();
-            System.out.println("PARSE COMCLUIDO COM SUCESSO");
+            System.out.println("compilação concluida com sucesso");
         }catch (InvalidExpressionException |InvalidTokenException | IOException ex){
             System.out.println(ex.getMessage());
         }

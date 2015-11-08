@@ -100,7 +100,7 @@ public class Parser {
             conditionalEvaluation();
         }
         else{
-            throw new IllegalStateException("Function should be called when the token can be a command");
+            throw builException("COMMAND");
         }
     }
 
@@ -127,6 +127,9 @@ public class Parser {
         commandEvaluation();
         if (token.getClassfication() == TokenClassification.ELSE){
             lookAhead();
+            if(!TokenClassification.isCommand(token.getClassfication())){
+                throw builException("COMMAND");
+            }
             commandEvaluation();
         }
 
