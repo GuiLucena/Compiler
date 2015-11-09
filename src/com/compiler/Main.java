@@ -5,6 +5,7 @@ import com.compiler.scanner.InvalidTokenException;
 import com.compiler.scanner.Scanner;
 import com.compiler.scanner.Token;
 import com.compiler.scanner.TokenClassification;
+import com.compiler.semantic.SemanticException;
 import com.compiler.util.FileReader;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class Main {
             Parser parser = new Parser(scanner);
             parser.parse();
             System.out.println("compilação concluida com sucesso");
-        }catch (InvalidExpressionException |InvalidTokenException | IOException ex){
+        }catch (InvalidExpressionException |InvalidTokenException |SemanticException |IOException ex ){
             System.out.println(ex.getMessage());
         }
         finally {

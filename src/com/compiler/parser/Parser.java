@@ -4,6 +4,7 @@ import com.compiler.scanner.InvalidTokenException;
 import com.compiler.scanner.Scanner;
 import com.compiler.scanner.Token;
 import com.compiler.scanner.TokenClassification;
+import com.compiler.semantic.*;
 
 import java.io.IOException;
 
@@ -14,12 +15,14 @@ public class Parser {
 
     private Scanner scanner;
     private Token token;
+    private SymbolTable symbolTable;
 
     public Parser(Scanner scanner) {
         this.scanner = scanner;
+        this.symbolTable = new SymbolTable();
     }
 
-    public void parse() throws IOException, InvalidTokenException, InvalidExpressionException {
+    public void parse() throws IOException, InvalidTokenException, InvalidExpressionException, SemanticException {
         lookAhead();
         programEvaluation();
         if(token.getClassfication() != TokenClassification.EOF){
@@ -27,7 +30,7 @@ public class Parser {
         }
     }
 
-    private void programEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException {
+    private void programEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException, SemanticException {
         if (token.getClassfication() != TokenClassification.INT){
             throw builException(TokenClassification.INT.toString());
         }
@@ -47,10 +50,11 @@ public class Parser {
         blockEvaluation();
     }
 
-    private void blockEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException {
+    private void blockEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException, SemanticException {
         if (token.getClassfication() != TokenClassification.BRACKETS_OPEN){
             throw builException(TokenClassification.BRACKETS_OPEN.toString());
         }
+        symbolTable.createScope();
         lookAhead();
 
         while (TokenClassification.isType(token.getClassfication())){
@@ -64,17 +68,20 @@ public class Parser {
         if (token.getClassfication() != TokenClassification.BRACKETS_CLOSE){
             throw  builException(TokenClassification.BRACKETS_CLOSE.toString());
         }
+        symbolTable.deleteScope();
         lookAhead();
     }
 
-    private void typeEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException {
+    private void typeEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException, SemanticException {
         if (!TokenClassification.isType(token.getClassfication())){
             throw builException("TYPE");
         }
+        TokenClassification type = token.getClassfication();
         lookAhead();
         if (token.getClassfication() != TokenClassification.ID){
             throw builException(TokenClassification.ID.toString());
         }
+        insertIdInSymbolTable(token.getLexeme(), type);
         lookAhead();
         while (token.getClassfication() != TokenClassification.SEMICOLON){
             if(token.getClassfication() != TokenClassification.COMMA){
@@ -84,12 +91,13 @@ public class Parser {
             if (token.getClassfication() != TokenClassification.ID){
                 throw  builException(TokenClassification.ID.toString());
             }
+            insertIdInSymbolTable(token.getLexeme(), type);
             lookAhead();
         }
         lookAhead();
     }
 
-    private void commandEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void commandEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if (TokenClassification.isBasicCommand(token.getClassfication())){
             basicCommandEvaluation();
         }
@@ -104,7 +112,7 @@ public class Parser {
         }
     }
 
-    private void conditionalEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void conditionalEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(token.getClassfication() != TokenClassification.IF){
             throw builException(TokenClassification.IF.toString());
         }
@@ -135,7 +143,7 @@ public class Parser {
 
     }
 
-    private void relationalExpressionEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void relationalExpressionEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(!TokenClassification.isArithimeticExpression(token.getClassfication())){
             throw builException("ARITHIMETIC_EXPRESSION");
         }
@@ -150,7 +158,7 @@ public class Parser {
         arithmeticExpressionEvaluation();
     }
 
-    private void arithmeticExpressionEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void arithmeticExpressionEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(!TokenClassification.isTerm(token.getClassfication())){
             throw builException("TERM");
         }
@@ -158,7 +166,7 @@ public class Parser {
         arithmeticContinuation();
     }
 
-    private void arithmeticContinuation() throws IOException, InvalidTokenException, InvalidExpressionException {
+    private void arithmeticContinuation() throws IOException, InvalidTokenException, InvalidExpressionException, SemanticException {
         if(token.getClassfication() == TokenClassification.PLUS || token.getClassfication() == TokenClassification.SUB){
             lookAhead();
             termEvaluation();
@@ -166,7 +174,7 @@ public class Parser {
         }
     }
 
-    private void termEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void termEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(!TokenClassification.isFactor(token.getClassfication())){
             throw  builException("FACTOR");
         }
@@ -174,7 +182,7 @@ public class Parser {
         termContinuation();
     }
 
-    private void termContinuation() throws IOException, InvalidTokenException, InvalidExpressionException {
+    private void termContinuation() throws IOException, InvalidTokenException, InvalidExpressionException, SemanticException {
         if(token.getClassfication() == TokenClassification.DIV || token.getClassfication() == TokenClassification.MULT){
             lookAhead();
             factorEvaluation();
@@ -182,7 +190,7 @@ public class Parser {
         }
     }
 
-    private void factorEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException {
+    private void factorEvaluation() throws IOException, InvalidTokenException, InvalidExpressionException, SemanticException {
         if(!TokenClassification.isFactor(token.getClassfication())){
             throw  builException("FACTOR");
         }
@@ -195,11 +203,14 @@ public class Parser {
             lookAhead();
         }
         else {
+            if(token.getClassfication() == TokenClassification.ID){
+                getTypedId(token.getLexeme());
+            }
             lookAhead();
         }
     }
 
-    private void iterationEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void iterationEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(!TokenClassification.isIteration(token.getClassfication())){
             throw builException("ITERATION");
         }
@@ -211,7 +222,7 @@ public class Parser {
         }
     }
 
-    private void doWhileEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void doWhileEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(token.getClassfication() != TokenClassification.DO){
             throw builException(TokenClassification.DO.toString());
         }
@@ -236,7 +247,7 @@ public class Parser {
         lookAhead();
     }
 
-    private void whileEValuation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void whileEValuation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(token.getClassfication() != TokenClassification.WHILE){
             throw builException(TokenClassification.WHILE.toString());
         }
@@ -253,7 +264,7 @@ public class Parser {
         commandEvaluation();
     }
 
-    private void basicCommandEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void basicCommandEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(!TokenClassification.isBasicCommand(token.getClassfication())){
             throw builException("BASIC_COMMAND");
         }
@@ -265,10 +276,11 @@ public class Parser {
         }
     }
 
-    private void assignmentEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException {
+    private void assignmentEvaluation() throws InvalidExpressionException, IOException, InvalidTokenException, SemanticException {
         if(token.getClassfication() != TokenClassification.ID){
             throw builException(TokenClassification.ID.toString());
         }
+        TypedLexem lexem = getTypedId(token.getLexeme());
         lookAhead();
         if(token.getClassfication() != TokenClassification.ASSIGNING){
             throw builException(TokenClassification.ASSIGNING.toString());
@@ -283,6 +295,21 @@ public class Parser {
 
     private void lookAhead() throws IOException, InvalidTokenException {
         token = scanner.getNextToken();
+    }
+
+    private void insertIdInSymbolTable(String lexem, TokenClassification type) throws SemanticException {
+        if(symbolTable.lexemExistInActualScope(lexem)){
+            throw new DuplicatedIdException(lexem,scanner.getLastLine(),scanner.getLastColumn());
+        }
+        symbolTable.insertLexem(lexem,type);
+    }
+
+    private TypedLexem getTypedId(String id) throws SemanticException{
+        TypedLexem lexem = symbolTable.searchLexem(id);
+        if(lexem == null){
+            throw new  UndeclaredVariableException(id,scanner.getLastLine(),scanner.getLastColumn());
+        }
+        return lexem;
     }
 
     private InvalidExpressionException builException(String expected) {
